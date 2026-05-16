@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Loan Submission</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<style>
+body {
+	padding: 30px;
+	background-color: #f4f7f6;
+}
+
+.container {
+	max-width: 800px;
+	background: white;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+</style>
+</head>
+<body>
+
+	<div class="container">
+		<h2 class="text-center mb-4">New Loan Application</h2>
+
+		<form id="submissionForm">
+			<div class="mb-3">
+				<label class="form-label">Company Name</label> <input type="text"
+					id="companyName" class="form-control" required>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Loan Amount</label> <input type="number"
+					id="loanAmount" class="form-control" required>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Loan Type</label> <select id="loanType"
+					class="form-select">
+					<option value="Business">Business</option>
+					<option value="Personal">Personal</option>
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary w-100">Submit
+				Application</button>
+		</form>
+		<hr class="my-4">
+
+		<div id="processArea" class="card mb-4 d-none border-primary">
+			<div
+				class="card-header bg-primary text-white d-flex justify-content-between">
+				<span>Processing Application ID: <strong
+					id="currentIdDisplay"></strong></span>
+				<button type="button" class="btn-close btn-close-white"
+					onclick="document.getElementById('processArea').classList.add('d-none')"></button>
+			</div>
+			<div class="card-body">
+				<div class="row mb-4 p-3 bg-light rounded border text-center">
+					<div class="col-md-4">
+						<div class="text-muted small">Credit Score</div>
+						<div id="viewCreditScore" class="h5 mb-0 text-primary">-</div>
+					</div>
+					<div class="col-md-4 border-start border-end">
+						<div class="text-muted small">Risk Score</div>
+						<div id="viewRiskScore" class="h5 mb-0 text-primary">-</div>
+					</div>
+					<div class="col-md-4">
+						<div class="text-muted small">Documents</div>
+						<div id="viewDocStatus" class="badge bg-secondary">Not
+							Checked</div>
+					</div>
+				</div>
+
+				<div class="row text-center">...</div>
+				<div class="row text-center">
+					<div class="col-md-3 mb-2">
+						<button class="btn btn-info w-100" onclick="runCreditCheck()">1.
+							Credit Check</button>
+					</div>
+					<div class="col-md-3 mb-2">
+						<button class="btn btn-secondary w-100" onclick="uploadDocs()">2.
+							Upload Docs</button>
+					</div>
+					<div class="col-md-3 mb-2">
+						<div class="btn-group w-100">
+							<button class="btn btn-success"
+								onclick="processDecision('approve')">Approve</button>
+							<button class="btn btn-danger"
+								onclick="processDecision('reject')">Reject</button>
+						</div>
+					</div>
+					<div class="col-md-3 mb-2">
+						<button class="btn btn-dark w-100" onclick="trackMoney()">4.
+							Track Funds</button>
+					</div>
+				</div>
+				<div id="processLogs"
+					class="mt-3 p-3 bg-light border rounded text-primary fw-bold text-center">
+					Ready to start processing.</div>
+			</div>
+
+		</div>
+
+		<h4>Recent Applications</h4>
+		<table class="table table-striped mt-3">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Company</th>
+					<th>Amount</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody id="applicationTableBody">
+			</tbody>
+		</table>
+	</div>
+
+	<script>
+    // Load existing applications when page opens
+    window.onload = loadApplications;
+
+    async function loadApplications() {
+        const response = await fetch('http://localhost:2424/api/loans/all');
+        const loans = await response.json();
+        const tbody = document.getElementById('applicationTableBody');
+        tbody.innerHTML = ''; 
+        
+        loans.forEach(loan => {
+            // Determine badge color based on status
+            let badgeClass = "bg-warning"; // Default for Pending
+            if(loan.status === "APPROVED") badgeClass = "bg-success";
+            if(loan.status === "REJECTED") badgeClass = "bg-danger";
+
+            tbody.innerHTML += `<tr>
+                <td>${loan.applicationId}</td>
+                <td>${loan.companyName}</td>
+                <td>$${loan.loanAmount}</td>
+                <td><span class="badge ${badgeClass}">${loan.status}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewDetails(${loan.applicationId})">View & Process</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    // Handle Form Submission
+    document.getElementById('submissionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const payload = {
+            companyName: document.getElementById('companyName').value,
+            loanAmount: document.getElementById('loanAmount').value,
+            loanType: document.getElementById('loanType').value,
+            submissionDate: new Date().toISOString().split('T')[0]
+        };
+
+        const response = await fetch('http://localhost:2424/api/loans/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            alert("Application Saved!");
+            document.getElementById('submissionForm').reset();
+            loadApplications(); // Refresh the list automatically
+        }
+    });
+    
+    let selectedLoanId = null;
+
+    async function viewDetails(id) {
+        // --- Your Existing UI Code ---
+        selectedLoanId = id;
+        document.getElementById('currentIdDisplay').innerText = id;
+        document.getElementById('processArea').classList.remove('d-none');
+        document.getElementById('processLogs').innerText = "Fetching application history...";
+        document.getElementById('processArea').scrollIntoView({ behavior: 'smooth' });
+
+        // --- NEW DATA FETCHING LOGIC ---
+
+        // 1. Fetch Credit/Risk Info (One-to-One)
+        try {
+            const riskResp = await fetch(`http://localhost:2424/api/credit/risk-score/${id}`);
+            const riskScore = await riskResp.text();
+            document.getElementById('viewRiskScore').innerText = riskScore || "N/A";
+            document.getElementById('viewCreditScore').innerText = "750"; // Using your simulated score
+        } catch(e) {
+            document.getElementById('viewRiskScore').innerText = "N/A";
+        }
+
+        // 2. Fetch Document Status (Many-to-One)
+        try {
+            const docResp = await fetch(`http://localhost:2424/api/documents/loan/${id}`);
+            const docs = await docResp.json();
+            const docBadge = document.getElementById('viewDocStatus');
+
+            if (docs.length === 0) {
+                docBadge.innerText = "No Docs";
+                docBadge.className = "badge bg-danger";
+            } else {
+                // Check if every document in the list is marked 'isValid'
+                const allValid = docs.every(d => d.isValid === true);
+                docBadge.innerText = allValid ? "Verified" : "Pending";
+                docBadge.className = allValid ? "badge bg-success" : "badge bg-warning";
+            }
+        } catch(e) {
+            document.getElementById('viewDocStatus').innerText = "Error";
+        }
+        
+        document.getElementById('processLogs').innerText = "Data loaded. Ready for decision.";
+    }
+
+    async function runCreditCheck() {
+        const response = await fetch(`http://localhost:2424/api/credit/evaluate/${selectedLoanId}`, { method: 'POST' });
+        const data = await response.json();
+        document.getElementById('processLogs').innerText = `✅ Evaluation Saved! Risk Score: ${data.riskScore} | Credit Score: ${data.creditScore}`;
+    }
+
+    async function uploadDocs() {
+        // Simulating the parameters you used in Postman
+        await fetch(`http://localhost:2424/api/documents/upload/${selectedLoanId}?type=ID_PROOF&path=/storage/loan_${selectedLoanId}/docs.pdf`, { method: 'POST' });
+        document.getElementById('processLogs').innerText = "✅ Documents uploaded and marked as Valid.";
+    }
+
+    async function processDecision(action) {
+        // action will be either 'approve' or 'reject'
+        const response = await fetch(`http://localhost:2424/api/approvals/${action}/${selectedLoanId}`, { 
+            method: 'POST' 
+        });
+        
+        if (response.ok) {
+            const message = await response.text();
+            
+            // Update the logs based on the action
+            if (action === 'approve') {
+                document.getElementById('processLogs').innerText = `🎉 Approved: ${message}`;
+            } else {
+                document.getElementById('processLogs').innerText = `❌ Rejected: ${message}`;
+            }
+            
+            // Refresh the table to show the new REJECTED or APPROVED status badge
+            loadApplications(); 
+        } else {
+            alert("Error processing decision.");
+        }
+    }
+
+    async function trackMoney() {
+        try {
+            const response = await fetch(`http://localhost:2424/api/disbursement/track/${selectedLoanId}`);
+            if(response.ok) {
+                const data = await response.json();
+                alert(`FUNDS DISBURSED!\nAmount: $${data.disbursedAmount}\nSchedule: ${data.repaymentSchedule}`);
+            } else {
+                alert("No disbursement found. Did you approve the loan first?");
+            }
+        } catch (err) {
+            alert("Error fetching disbursement data.");
+        }
+    }
+</script>
+
+</body>
+</html>
