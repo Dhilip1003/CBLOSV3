@@ -60,6 +60,7 @@ public class DisbursementService {
         StringBuilder report = new StringBuilder("--- Disbursement Compliance Report ---\n");
         for (Disbursement d : allDisbursements) {
             report.append("ID: ").append(d.getId())
+                  .append(" | AccountDbId: ").append(d.getLoanAccount().getId())
                   .append(" | Account: ").append(d.getLoanAccount().getAccountNumber())
                   .append(" | Amount: ").append(d.getDisbursedAmount())
                   .append(" | Date: ").append(d.getDisbursementDate()).append("\n");
