@@ -1,5 +1,6 @@
 package com.cblos.service;
 
+import com.cblos.dto.DocumentSummary;
 import com.cblos.model.Document;
 import com.cblos.model.LoanApplication;
 import com.cblos.repository.DocumentRepository;
@@ -31,21 +32,28 @@ public class DocumentService {
         return documentRepository.save(doc);
     }
 
-    // 2. UPDATED: Validation now checks if fileData is present
+    // Officer confirms the document is acceptable (upload alone does not validate)
     public Document validateDocument(Integer documentId) {
         Document doc = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
-        
-        // Logic: If the byte array is not null and has content, it's a valid upload
-        if (doc.getFileData() != null && doc.getFileData().length > 0) {
-            doc.setIsValid(true);
+
+        if (doc.getFileData() == null || doc.getFileData().length == 0) {
+            doc.setIsValid(false);
+            return documentRepository.save(doc);
         }
-        
+
+        doc.setIsValid(true);
         return documentRepository.save(doc);
     }
 
     public List<Document> getDocumentsByLoan(Integer applicationId) {
         return documentRepository.findByLoanApplication_ApplicationId(applicationId);
+    }
+
+    public List<DocumentSummary> listSummariesForApplication(Integer applicationId) {
+        return getDocumentsByLoan(applicationId).stream()
+                .map(DocumentSummary::from)
+                .toList();
     }
     
     // 3. NEW: Method to fetch a specific document for downloading

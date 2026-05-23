@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login · CBLOS</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0a0f18; color: #eef2f7; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .card { background: #121a2a; border: 1px solid rgba(0,229,200,.2); border-radius: 12px; padding: 2rem; width: 100%; max-width: 380px; }
+    h1 { margin: 0 0 .5rem; font-size: 1.4rem; }
+    p { color: #8b9cb5; font-size: .9rem; margin: 0 0 1.5rem; }
+    label { display: block; font-size: .75rem; color: #8b9cb5; margin-bottom: .35rem; }
+    input { width: 100%; padding: .65rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid #334; background: #0e1420; color: #eef2f7; box-sizing: border-box; }
+    button { width: 100%; padding: .7rem; border: 0; border-radius: 8px; background: #00e5c8; color: #031a16; font-weight: 600; cursor: pointer; }
+    .hint { margin-top: 1.25rem; font-size: .78rem; color: #8b9cb5; line-height: 1.5; }
+    .err { color: #ff5c5c; font-size: .85rem; min-height: 1.2rem; }
+    a { color: #00e5c8; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>CBLOS Login</h1>
+    <p>Corporate users and bank staff sign in here.</p>
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" required autocomplete="username">
+      <label for="password">Password</label>
+      <input type="password" id="password" required autocomplete="current-password">
+      <div class="err" id="err"></div>
+      <button type="submit">Sign in</button>
+    </form>
+    <div class="hint">
+      Demo accounts (password: <strong>password</strong>):<br>
+      customer@demo.com — company portal<br>
+      officer@bank.com — loan officer<br>
+      manager@bank.com — manager
+    </div>
+    <p style="margin-top:1rem"><a href="/index.html">← Dashboard</a></p>
+  </div>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var email = document.getElementById('email').value.trim();
+      var password = document.getElementById('password').value;
+      var err = document.getElementById('err');
+      err.textContent = '';
+      var token = 'Basic ' + btoa(email + ':' + password);
+      try {
+        var res = await fetch('/api/auth/me', { headers: { Authorization: token } });
+        if (!res.ok) {
+          err.textContent = 'Invalid email or password.';
+          return;
+        }
+        sessionStorage.setItem('cblosAuth', token);
+        window.location.href = '/index.html';
+      } catch (ex) {
+        err.textContent = 'Cannot reach server.';
+      }
+    });
+  </script>
+</body>
+</html>

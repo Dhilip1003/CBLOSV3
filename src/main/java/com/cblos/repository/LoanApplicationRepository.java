@@ -6,4 +6,5 @@ import com.cblos.model.LoanApplication;
 
 public interface LoanApplicationRepository extends JpaRepository<LoanApplication, Integer> {
 
+    java.util.List<LoanApplication> findByCustomer_Id(Integer customerId);
 }

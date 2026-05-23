@@ -16,17 +16,15 @@ public class ApprovalController {
     public ResponseEntity<String> approveLoan(
             @PathVariable Integer applicationId,
             @RequestParam(defaultValue = "Verified financial documents and collateral.") String comments) {
-        
-        // This will approve the loan, create the account, and schedule disbursements!
         approvalService.processApproval(applicationId, "Approved", comments);
-        return ResponseEntity.ok("Loan approved successfully. Loan Account and Disbursement Schedule have been generated.");
+        return ResponseEntity.ok(
+                "Loan approved successfully. Loan Account and Disbursement Schedule have been generated.");
     }
 
     @PostMapping("/reject/{applicationId}")
     public ResponseEntity<String> rejectLoan(
             @PathVariable Integer applicationId,
             @RequestParam(defaultValue = "Failed credit assessment.") String comments) {
-        
         approvalService.processApproval(applicationId, "Rejected", comments);
         return ResponseEntity.ok("Loan application has been rejected.");
     }

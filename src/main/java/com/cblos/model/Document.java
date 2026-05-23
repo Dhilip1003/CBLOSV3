@@ -32,7 +32,7 @@ public class Document {
 
     public Document() {
         this.uploadDate = LocalDateTime.now();
-        this.isValid = true; // Defaulting to true for now
+        this.isValid = false;
     }
 
     // --- UPDATED GETTERS AND SETTERS ---

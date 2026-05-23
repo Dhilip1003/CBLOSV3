@@ -1,0 +1,155 @@
+@import 'bootstrap/scss/functions';
+
+$primary: #00e5c8;
+$secondary: #8b9cb5;
+$success: #00e5c8;
+$danger: #ff5c5c;
+$warning: #e6b84d;
+$body-bg: #04060a;
+$body-color: #eef2f7;
+$card-bg: rgba(14, 20, 32, 0.85);
+$card-border-color: rgba(0, 245, 212, 0.15);
+$input-bg: rgba(18, 26, 42, 0.92);
+$input-border-color: rgba(139, 156, 181, 0.25);
+$input-color: #eef2f7;
+$link-color: #00e5c8;
+$font-family-sans-serif: 'Segoe UI', system-ui, sans-serif;
+
+@import 'bootstrap/scss/bootstrap';
+
+:root {
+  --cblos-accent: #00e5c8;
+  --cblos-surface: rgba(14, 20, 32, 0.75);
+  --cblos-border: rgba(0, 245, 212, 0.1);
+}
+
+body {
+  min-height: 100vh;
+  background-color: #04060a;
+  background-image:
+    radial-gradient(ellipse 110% 60% at 50% -25%, rgba(0, 229, 200, 0.08), transparent 50%),
+    linear-gradient(180deg, #0a0f18 0%, #04060a 45%);
+}
+
+.cblos-nav {
+  background: rgba(4, 6, 10, 0.9);
+  border-bottom: 1px solid var(--cblos-border);
+  backdrop-filter: blur(16px);
+}
+
+.brand-mark {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  background: linear-gradient(145deg, #00e5c8, #4d7cff);
+  box-shadow: 0 0 16px rgba(0, 229, 200, 0.45);
+}
+
+.cblos-card {
+  background: var(--cblos-surface);
+  border: 1px solid var(--cblos-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.page-sub {
+  color: #8b9cb5;
+}
+
+.tile-link {
+  display: block;
+  padding: 1rem 1.1rem;
+  background: rgba(18, 26, 42, 0.92);
+  border: 1px solid var(--cblos-border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: #eef2f7;
+  font-weight: 600;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.tile-link:hover {
+  border-color: rgba(0, 245, 212, 0.35);
+  color: #00e5c8;
+  box-shadow: 0 0 28px rgba(0, 229, 200, 0.08);
+}
+
+.tile-link small {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: #8b9cb5;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 0.2rem;
+}
+
+.badge-stage-ok {
+  background: rgba(0, 229, 200, 0.14);
+  color: #00e5c8;
+}
+
+.badge-stage-warn {
+  background: rgba(230, 184, 77, 0.18);
+  color: #e6b84d;
+}
+
+.badge-stage-bad {
+  background: rgba(255, 92, 92, 0.16);
+  color: #ff5c5c;
+}
+
+.pre-report {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--cblos-border);
+  color: #8b9cb5;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, #00e5c8, #0ab896);
+  border: none;
+  color: #031a16;
+  font-weight: 600;
+}
+
+.btn-accent:hover {
+  color: #031a16;
+  filter: brightness(1.05);
+}
+
+.table-cblos {
+  --bs-table-bg: transparent;
+  --bs-table-color: #eef2f7;
+  --bs-table-border-color: rgba(139, 156, 181, 0.12);
+}
+
+.table-cblos thead th {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8b9cb5;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.form-control,
+.form-select {
+  background-color: rgba(18, 26, 42, 0.92);
+  border-color: rgba(139, 156, 181, 0.25);
+  color: #eef2f7;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: rgba(18, 26, 42, 0.92);
+  border-color: rgba(0, 245, 212, 0.4);
+  color: #eef2f7;
+  box-shadow: 0 0 0 0.2rem rgba(0, 229, 200, 0.12);
+}

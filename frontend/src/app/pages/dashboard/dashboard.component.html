@@ -1,0 +1,95 @@
+<h1 class="page-title">Operations dashboard</h1>
+<p class="page-sub">Origination, credit, and servicing in one workspace.</p>
+
+<div class="cblos-card card mb-3 p-4">
+  <h2 class="h6 mb-3">Workspaces</h2>
+  <div class="row g-2">
+    <div class="col-6 col-md-4 col-lg-3"><a class="tile-link" routerLink="/customers">Client onboarding<small>Registry</small></a></div>
+    <div class="col-6 col-md-4 col-lg-3"><a class="tile-link" routerLink="/officers">Relationship officers<small>Capacity</small></a></div>
+    <div class="col-6 col-md-4 col-lg-3"><a class="tile-link" routerLink="/loans">Loan pipeline<small>Applications</small></a></div>
+    <div class="col-6 col-md-4 col-lg-3"><a class="tile-link" routerLink="/collateral">Collateral<small>Pledges</small></a></div>
+    <div class="col-6 col-md-4 col-lg-3"><a class="tile-link" routerLink="/documents">Document center<small>KYC & legal</small></a></div>
+    <div class="col-6 col-md-4 col-lg-3"><a class="tile-link" routerLink="/credit">Credit analytics<small>Scores & risk</small></a></div>
+    <div class="col-6 col-md-4 col-lg-3"><a class="tile-link" routerLink="/approvals">Credit decisions<small>Approve / decline</small></a></div>
+    <div class="col-6 col-md-4 col-lg-3"><a class="tile-link" routerLink="/disbursements">Disbursements<small>Funding</small></a></div>
+    <div class="col-6 col-md-4 col-lg-3"><a class="tile-link" routerLink="/repayments">Loan servicing<small>Schedule & pay</small></a></div>
+  </div>
+</div>
+
+<div class="cblos-card card mb-3 p-4">
+  <h2 class="h6 mb-3">New application</h2>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label small text-secondary">Client reference</label>
+      <input type="number" class="form-control" [(ngModel)]="customerId" min="1">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label small text-secondary">Requested amount</label>
+      <input type="number" class="form-control" [(ngModel)]="loanAmount" step="0.01" min="0">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label small text-secondary">Product</label>
+      <select class="form-select" [(ngModel)]="loanType">
+        <option>Business</option>
+        <option>Personal</option>
+      </select>
+    </div>
+  </div>
+  <button type="button" class="btn btn-accent mt-3" (click)="submitLoan()">Submit to pipeline</button>
+</div>
+
+<div class="cblos-card card mb-3 p-4">
+  <h2 class="h6 mb-3">Pipeline</h2>
+  <div class="table-responsive">
+    <table class="table table-cblos table-sm align-middle">
+      <thead><tr><th>Ref</th><th>Counterparty</th><th>Exposure</th><th>Stage</th><th></th></tr></thead>
+      <tbody>
+        @for (loan of loans; track loan.applicationId) {
+          <tr>
+            <td>{{ loan.applicationId }}</td>
+            <td>{{ company(loan) }}</td>
+            <td>{{ loan.loanAmount }}</td>
+            <td><span class="badge rounded-pill" [ngClass]="statusClass(loan.status)">{{ loan.status }}</span></td>
+            <td><button type="button" class="btn btn-outline-secondary btn-sm" (click)="open(loan.applicationId)">Open</button></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (showProcess && selectedId) {
+  <div class="cblos-card card p-4 border border-info border-opacity-25">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span>Application <strong class="text-info">#{{ selectedId }}</strong></span>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="showProcess = false">Close</button>
+    </div>
+    <div class="row text-center g-3 mb-3 p-3 rounded" style="background:rgba(0,0,0,.32)">
+      <div class="col"><div class="small text-secondary">Risk</div><div class="fw-bold text-info">{{ riskScore }}</div></div>
+      <div class="col"><div class="small text-secondary">Bureau</div><div class="fw-bold text-info">{{ creditScore }}</div></div>
+      <div class="col"><div class="small text-secondary">Files</div><div class="fw-bold">{{ docStatus }}</div></div>
+    </div>
+    @if (auth.isBankStaff()) {
+      <div class="d-flex flex-wrap gap-2 mb-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="runCredit()">Run assessment</button>
+        <input type="file" class="form-control form-control-sm" style="max-width:220px" (change)="onFile($event)">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="uploadDoc()">Upload</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="validateAll()">Certify queue</button>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-accent btn-sm" (click)="approve()">Approve</button>
+        <button type="button" class="btn btn-danger btn-sm" (click)="reject()">Decline</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="loadReport()">Funding ledger</button>
+      </div>
+    } @else {
+      <div class="d-flex flex-wrap gap-2 mb-2">
+        <input type="file" class="form-control form-control-sm" style="max-width:220px" (change)="onFile($event)">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="uploadDoc()">Upload document</button>
+      </div>
+    }
+    <div class="pre-report p-3 mt-3 rounded">{{ log }}</div>
+    @if (report) {
+      <pre class="pre-report p-3 mt-2 rounded">{{ report }}</pre>
+    }
+  </div>
+}

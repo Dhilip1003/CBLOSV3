@@ -4,6 +4,7 @@ import com.cblos.model.Collateral;
 import com.cblos.model.LoanApplication;
 import com.cblos.repository.CollateralRepository;
 import com.cblos.repository.LoanApplicationRepository;
+import com.cblos.security.AccessControlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -17,7 +18,11 @@ public class CollateralService {
     @Autowired
     private LoanApplicationRepository loanRepository;
 
+    @Autowired
+    private AccessControlService accessControl;
+
     public Collateral addCollateralToApplication(Integer applicationId, Collateral collateral) {
+        accessControl.ensureCustomerOwnsApplication(applicationId);
         LoanApplication app = loanRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Loan application not found"));
         
@@ -26,6 +31,7 @@ public class CollateralService {
     }
 
     public List<Collateral> getCollateralForApplication(Integer applicationId) {
+        accessControl.ensureCustomerOwnsApplication(applicationId);
         return collateralRepository.findByLoanApplication_ApplicationId(applicationId);
     }
 }

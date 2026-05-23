@@ -1,0 +1,21 @@
+<h1 class="page-title">Collateral management</h1>
+<p class="page-sub">Security and pledge register.</p>
+<div class="cblos-card card mb-3 p-4">
+  <h2 class="h6 mb-3">New pledge</h2>
+  <div class="row g-3">
+    <div class="col-md-4"><label class="form-label small text-secondary">Application ref</label><input type="number" class="form-control" [(ngModel)]="applicationId"></div>
+    <div class="col-md-4"><label class="form-label small text-secondary">Asset class</label><input class="form-control" [(ngModel)]="collateralType"></div>
+    <div class="col-md-4"><label class="form-label small text-secondary">Appraised value</label><input type="number" class="form-control" [(ngModel)]="estimatedValue"></div>
+  </div>
+  <button type="button" class="btn btn-accent mt-3" (click)="submit()">Add pledge</button>
+  @if (message) { <div class="alert mt-3 py-2" [class.alert-success]="!error" [class.alert-danger]="error">{{ message }}</div> }
+</div>
+<div class="cblos-card card p-4">
+  <h2 class="h6 mb-3">Schedule</h2>
+  <input type="number" class="form-control mb-2" style="max-width:200px" [(ngModel)]="listAppId">
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="load()">Load</button>
+  <table class="table table-cblos table-sm mt-3">
+    <thead><tr><th>ID</th><th>Class</th><th>Value</th></tr></thead>
+    <tbody>@for (c of rows; track c.id) { <tr><td>{{ c.id }}</td><td>{{ c.collateralType }}</td><td>{{ c.estimatedValue }}</td></tr> }</tbody>
+  </table>
+</div>

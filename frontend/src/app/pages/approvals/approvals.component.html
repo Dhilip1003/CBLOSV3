@@ -1,0 +1,11 @@
+<h1 class="page-title">Credit committee</h1>
+<p class="page-sub">Sanctioning authority.</p>
+<div class="cblos-card card p-4">
+  <label class="form-label small text-secondary">Application reference</label>
+  <input type="number" class="form-control mb-3" style="max-width:240px" [(ngModel)]="applicationId">
+  <label class="form-label small text-secondary">Chair notes</label>
+  <textarea class="form-control mb-3" rows="3" [(ngModel)]="comments"></textarea>
+  <button type="button" class="btn btn-accent btn-sm me-2" (click)="approve()">Sanction</button>
+  <button type="button" class="btn btn-danger btn-sm" (click)="reject()">Decline</button>
+  <pre class="pre-report p-3 mt-3 rounded">{{ output }}</pre>
+</div>

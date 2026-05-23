@@ -1,0 +1,26 @@
+<h1 class="page-title">Corporate clients</h1>
+<p class="page-sub">Master legal entity registry.</p>
+<div class="cblos-card card mb-3 p-4">
+  <h2 class="h6 mb-3">New client</h2>
+  <div class="row g-3">
+    <div class="col-md-4"><label class="form-label small text-secondary">Tax ID</label><input class="form-control" [(ngModel)]="taxId"></div>
+    <div class="col-md-4"><label class="form-label small text-secondary">Legal name</label><input class="form-control" [(ngModel)]="companyName"></div>
+    <div class="col-md-4"><label class="form-label small text-secondary">Sector</label><input class="form-control" [(ngModel)]="industryType"></div>
+  </div>
+  <button type="button" class="btn btn-accent mt-3" (click)="submit()">Register</button>
+  @if (message) { <div class="alert mt-3 py-2" [class.alert-success]="!error" [class.alert-danger]="error">{{ message }}</div> }
+</div>
+<div class="cblos-card card p-4">
+  <div class="d-flex justify-content-between mb-3"><h2 class="h6 mb-0">Directory</h2><button type="button" class="btn btn-outline-secondary btn-sm" (click)="reload()">Refresh</button></div>
+  <table class="table table-cblos table-sm">
+    <thead><tr><th>ID</th><th>Tax ID</th><th>Entity</th><th>Sector</th><th></th></tr></thead>
+    <tbody>
+      @for (c of customers; track c.id) {
+        <tr>
+          <td>{{ c.id }}</td><td>{{ c.taxId }}</td><td>{{ c.companyName }}</td><td>{{ c.industryType || '—' }}</td>
+          <td><button type="button" class="btn btn-outline-secondary btn-sm" (click)="copyId(c.id)">Copy ID</button></td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

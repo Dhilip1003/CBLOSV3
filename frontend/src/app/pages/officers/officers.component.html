@@ -1,0 +1,19 @@
+<h1 class="page-title">Relationship officers</h1>
+<p class="page-sub">Staff registry and routing capacity.</p>
+<div class="cblos-card card mb-3 p-4">
+  <h2 class="h6 mb-3">Enrollment</h2>
+  <div class="row g-3">
+    <div class="col-md-4"><label class="form-label small text-secondary">Staff number</label><input class="form-control" [(ngModel)]="employeeId"></div>
+    <div class="col-md-4"><label class="form-label small text-secondary">Full name</label><input class="form-control" [(ngModel)]="name"></div>
+    <div class="col-md-4"><label class="form-label small text-secondary">Role</label><input class="form-control" [(ngModel)]="designation"></div>
+  </div>
+  <button type="button" class="btn btn-accent mt-3" (click)="submit()">Enroll</button>
+  @if (message) { <div class="alert mt-3 py-2" [class.alert-success]="!error" [class.alert-danger]="error">{{ message }}</div> }
+</div>
+<div class="cblos-card card p-4">
+  <div class="d-flex justify-content-between mb-3"><h2 class="h6 mb-0">Roster</h2><button type="button" class="btn btn-outline-secondary btn-sm" (click)="reload()">Refresh</button></div>
+  <table class="table table-cblos table-sm">
+    <thead><tr><th>ID</th><th>Staff #</th><th>Name</th><th>Role</th></tr></thead>
+    <tbody>@for (o of officers; track o.id) { <tr><td>{{ o.id }}</td><td>{{ o.employeeId }}</td><td>{{ o.name }}</td><td>{{ o.designation || '—' }}</td></tr> }</tbody>
+  </table>
+</div>

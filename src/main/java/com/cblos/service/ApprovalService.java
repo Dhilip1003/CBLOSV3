@@ -2,8 +2,10 @@ package com.cblos.service;
 
 import com.cblos.model.*;
 import com.cblos.repository.*;
+import com.cblos.security.AccessControlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
@@ -35,7 +37,10 @@ public class ApprovalService {
     private CollateralRepository collateralRepository;
 
     @Autowired
-    private DocumentRepository documentRepository; // Ensure this is autowired!
+    private DocumentRepository documentRepository;
+
+    @Autowired
+    private AccessControlService accessControl;
 
     public Approval submitApproval(Integer applicationId, Integer approverId, Integer level, String status, String comments) {
         
@@ -97,8 +102,22 @@ public class ApprovalService {
         return approvalRepository.save(approval);
     }
 
+    @Transactional
     public void processApproval(Integer id, String status, String comments) {
-        Approval result = submitApproval(id, 1, 2, status, comments);
+        LoanApplication application = loanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Loan application not found"));
+
+        String currentStatus = application.getStatus();
+        if (currentStatus != null) {
+            String normalized = currentStatus.trim().toUpperCase();
+            if ("APPROVED".equals(normalized) || "REJECTED".equals(normalized)) {
+                throw new IllegalStateException(
+                        "Loan application is already " + normalized + ". Cannot process again.");
+            }
+        }
+
+        Integer approverId = accessControl.getCurrentOfficerId();
+        Approval result = submitApproval(id, approverId, 2, status, comments);
         
         if ("Approved".equalsIgnoreCase(status)) {
             LoanApplication app = result.getLoanApplication();

@@ -6,6 +6,7 @@ import com.cblos.model.CorporateCustomer;
 import com.cblos.repository.LoanApplicationRepository;
 import com.cblos.repository.LoanOfficerRepository;
 import com.cblos.repository.CorporateCustomerRepository;
+import com.cblos.security.AccessControlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,12 @@ public class LoanApplicationService {
     
     @Autowired
     private LoanOfficerRepository officerRepository;
-    
-    
+
+    @Autowired
+    private AccessControlService accessControl;
 
     public LoanApplication submitApplication(LoanApplication app, Integer customerId) {
+        accessControl.ensureCustomerIdMatches(customerId);
         // 1. Find the customer
         CorporateCustomer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
@@ -51,17 +54,23 @@ public class LoanApplicationService {
     }
 
     public String getStatusById(Integer id) {
+        accessControl.ensureCustomerOwnsApplication(id);
         return loanRepository.findById(id)
                 .map(LoanApplication::getStatus)
                 .orElse("Application Not Found");
     }
 
     public LoanApplication getApplicationById(Integer id) {
+        accessControl.ensureCustomerOwnsApplication(id);
         return loanRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Loan Application Not Found"));
     }
     
     public List<LoanApplication> getAllApplications() {
+        if (accessControl.isCustomer()) {
+            Integer companyId = accessControl.currentUser().getCorporateCustomerId();
+            return loanRepository.findByCustomer_Id(companyId);
+        }
         return loanRepository.findAll();
     }
 }

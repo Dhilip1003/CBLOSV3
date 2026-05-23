@@ -1,9 +1,11 @@
 package com.cblos.controller;
 
+import com.cblos.dto.DocumentSummary;
 import com.cblos.model.Document;
 import com.cblos.model.LoanApplication;
 import com.cblos.repository.DocumentRepository;
 import com.cblos.repository.LoanApplicationRepository;
+import com.cblos.security.AccessControlService;
 import com.cblos.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -28,22 +30,26 @@ public class DocumentController {
     @Autowired
     private DocumentService documentService;
 
+    @Autowired
+    private AccessControlService accessControl;
+
     // 1. Upload a document (Store in DB as BLOB)
     @PostMapping("/upload/{applicationId}")
     public ResponseEntity<String> uploadDocument(
             @PathVariable Integer applicationId,
             @RequestParam("file") MultipartFile file) throws IOException {
 
+        accessControl.ensureCustomerOwnsApplication(applicationId);
+
         LoanApplication app = loanRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
-        Document doc = new Document();
-        doc.setFileName(file.getOriginalFilename());
-        doc.setFileType(file.getContentType());
-        doc.setFileData(file.getBytes());
-        doc.setLoanApplication(app);
-
-        documentRepository.save(doc);
+        documentService.uploadDocument(
+                app,
+                null,
+                file.getOriginalFilename(),
+                file.getContentType(),
+                file.getBytes());
 
         return ResponseEntity.ok("Document uploaded successfully: " + file.getOriginalFilename());
     }
@@ -51,6 +57,7 @@ public class DocumentController {
     // 2. Download/View a document
     @GetMapping("/download/{documentId}")
     public ResponseEntity<byte[]> getDocument(@PathVariable Integer documentId) {
+        accessControl.ensureCustomerOwnsDocument(documentId);
         Document doc = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
 
@@ -60,10 +67,11 @@ public class DocumentController {
                 .body(doc.getFileData());
     }
     
-    // 3. List all documents for an application
+    // 3. List document metadata only (no file bytes)
     @GetMapping("/application/{applicationId}")
-    public ResponseEntity<List<Document>> listDocs(@PathVariable Integer applicationId) {
-        return ResponseEntity.ok(documentRepository.findByLoanApplication_ApplicationId(applicationId));
+    public ResponseEntity<List<DocumentSummary>> listDocs(@PathVariable Integer applicationId) {
+        accessControl.ensureCustomerOwnsApplication(applicationId);
+        return ResponseEntity.ok(documentService.listSummariesForApplication(applicationId));
     }
 
     // 4. Validate a specific document
@@ -80,6 +88,7 @@ public class DocumentController {
     // 5. Get validation status of a document
     @GetMapping("/validate/{documentId}")
     public ResponseEntity<String> getValidationStatus(@PathVariable Integer documentId) {
+        accessControl.ensureCustomerOwnsDocument(documentId);
         Document doc = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
         
@@ -110,6 +119,7 @@ public class DocumentController {
     // 7. Get validation report for an application
     @GetMapping("/validation-report/{applicationId}")
     public ResponseEntity<String> getValidationReport(@PathVariable Integer applicationId) {
+        accessControl.ensureCustomerOwnsApplication(applicationId);
         List<Document> documents = documentRepository.findByLoanApplication_ApplicationId(applicationId);
         
         if (documents.isEmpty()) {
