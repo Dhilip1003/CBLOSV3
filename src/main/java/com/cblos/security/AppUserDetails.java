@@ -11,7 +11,11 @@ import java.util.List;
 
 public class AppUserDetails implements UserDetails {
 
-    private final AppUser user;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final AppUser user;
 
     public AppUserDetails(AppUser user) {
         this.user = user;
