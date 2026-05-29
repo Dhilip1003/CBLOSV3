@@ -21,6 +21,15 @@ public class Collateral {
 
     @Column(name = "estimated_value", precision = 18, scale = 2)
     private BigDecimal estimatedValue;
+    
+    @Column(name = "asset_reference_number", nullable = false)
+    private String assetReferenceNumber; // e.g., Property Survey ID, Vehicle VIN, Equipment Serial Number
+
+    @Column(name = "verification_status", nullable = false)
+    private String verificationStatus; // PENDING, VERIFIED, REJECTED
+
+    @Column(length = 1000)
+    private String description;
 
     public Collateral() {}
 
@@ -35,4 +44,13 @@ public class Collateral {
 
     public BigDecimal getEstimatedValue() { return estimatedValue; }
     public void setEstimatedValue(BigDecimal estimatedValue) { this.estimatedValue = estimatedValue; }
+    
+    public String getAssetReferenceNumber() { return assetReferenceNumber; }
+    public void setAssetReferenceNumber(String assetReferenceNumber) { this.assetReferenceNumber = assetReferenceNumber; }
+
+    public String getVerificationStatus() { return verificationStatus; }
+    public void setVerificationStatus(String verificationStatus) { this.verificationStatus = verificationStatus; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }

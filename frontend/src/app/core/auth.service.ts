@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { AuthUser } from './models';
+import { AuthUser, CorporateCustomer, LoanOfficer } from './models';
 
 const STORAGE_KEY = 'cblosAuth';
 
@@ -47,5 +47,41 @@ export class AuthService {
 
   isCustomer(): boolean {
     return this.user()?.role === 'CUSTOMER';
+  }
+
+  isAdmin(): boolean {
+    return this.user()?.role === 'ADMIN';
+  }
+
+  isManager(): boolean {
+    return this.user()?.role === 'MANAGER';
+  }
+
+  // Register new customer
+  async registerCustomer(customer: CorporateCustomer): Promise<CorporateCustomer> {
+    return await firstValueFrom(
+      this.http.post<CorporateCustomer>('/api/customers/onboard', customer)
+    );
+  }
+
+  // Register new loan officer (Admin only)
+  async registerOfficer(officer: LoanOfficer): Promise<LoanOfficer> {
+    return await firstValueFrom(
+      this.http.post<LoanOfficer>('/api/officers/register', officer)
+    );
+  }
+
+  // Get all officers (Admin/Manager only)
+  async getAllOfficers(): Promise<LoanOfficer[]> {
+    return await firstValueFrom(
+      this.http.get<LoanOfficer[]>('/api/officers/all')
+    );
+  }
+
+  // Create app user account for new officer
+  async createAdminUser(email: string, role: string): Promise<any> {
+    return await firstValueFrom(
+      this.http.post('/api/admin/create-user', { email, role })
+    );
   }
 }

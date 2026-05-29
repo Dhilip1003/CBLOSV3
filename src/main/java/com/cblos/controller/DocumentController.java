@@ -1,14 +1,17 @@
 package com.cblos.controller;
 
 import com.cblos.dto.DocumentSummary;
+import com.cblos.model.CorporateCustomer;
 import com.cblos.model.Document;
 import com.cblos.model.LoanApplication;
+import com.cblos.repository.CorporateCustomerRepository;
 import com.cblos.repository.DocumentRepository;
 import com.cblos.repository.LoanApplicationRepository;
 import com.cblos.security.AccessControlService;
 import com.cblos.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,15 +31,19 @@ public class DocumentController {
     private LoanApplicationRepository loanRepository;
 
     @Autowired
+    private CorporateCustomerRepository customerRepository; // ─── NEW: Added to fetch onboarding context ───
+
+    @Autowired
     private DocumentService documentService;
 
     @Autowired
     private AccessControlService accessControl;
 
-    // 1. Upload a document (Store in DB as BLOB)
+    // 1. Existing Method: Upload a document tied to a Loan Application
     @PostMapping("/upload/{applicationId}")
     public ResponseEntity<String> uploadDocument(
             @PathVariable Integer applicationId,
+            @RequestParam("documentType") String documentType, // Added parameter to keep service layer explicit
             @RequestParam("file") MultipartFile file) throws IOException {
 
         accessControl.ensureCustomerOwnsApplication(applicationId);
@@ -46,15 +53,39 @@ public class DocumentController {
 
         documentService.uploadDocument(
                 app,
-                null,
+                documentType,
                 file.getOriginalFilename(),
                 file.getContentType(),
                 file.getBytes());
 
-        return ResponseEntity.ok("Document uploaded successfully: " + file.getOriginalFilename());
+        return ResponseEntity.ok("Document uploaded successfully for Application ID: " + applicationId);
     }
 
-    // 2. Download/View a document
+    // 2. ─── NEW ENDPOINT: Upload foundational legal documents during initial Customer Registration ───
+    @PostMapping("/upload/registration/{customerId}")
+    public ResponseEntity<String> uploadRegistrationDocument(
+            @PathVariable Integer customerId,
+            @RequestParam("documentType") String documentType, // e.g., CERTIFICATE_OF_INCORPORATION
+            @RequestParam("file") MultipartFile file) throws IOException {
+
+        // Enforce that the logged-in user context matches the customer record being modified
+        accessControl.ensureCustomerOwnsCustomerRecord(customerId);
+
+        CorporateCustomer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Corporate Customer profile not found"));
+
+        documentService.uploadRegistrationDocument(
+                customer,
+                documentType,
+                file.getOriginalFilename(),
+                file.getContentType(),
+                file.getBytes());
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("Legal registration document uploaded successfully: " + file.getOriginalFilename());
+    }
+
+    // 3. Download/View a document
     @GetMapping("/download/{documentId}")
     public ResponseEntity<byte[]> getDocument(@PathVariable Integer documentId) {
         accessControl.ensureCustomerOwnsDocument(documentId);
@@ -67,14 +98,14 @@ public class DocumentController {
                 .body(doc.getFileData());
     }
     
-    // 3. List document metadata only (no file bytes)
+    // 4. List document metadata only (no file bytes) for an application
     @GetMapping("/application/{applicationId}")
     public ResponseEntity<List<DocumentSummary>> listDocs(@PathVariable Integer applicationId) {
         accessControl.ensureCustomerOwnsApplication(applicationId);
         return ResponseEntity.ok(documentService.listSummariesForApplication(applicationId));
     }
 
-    // 4. Validate a specific document
+    // 5. Validate a specific document
     @PutMapping("/validate/{documentId}")
     public ResponseEntity<String> validateDocument(@PathVariable Integer documentId) {
         Document validatedDoc = documentService.validateDocument(documentId);
@@ -85,7 +116,7 @@ public class DocumentController {
         }
     }
 
-    // 5. Get validation status of a document
+    // 6. Get validation status of a document
     @GetMapping("/validate/{documentId}")
     public ResponseEntity<String> getValidationStatus(@PathVariable Integer documentId) {
         accessControl.ensureCustomerOwnsDocument(documentId);
@@ -96,7 +127,7 @@ public class DocumentController {
         return ResponseEntity.ok("Document ID: " + documentId + " | Status: " + status + " | File: " + doc.getFileName());
     }
 
-    // 6. Validate all documents for an application
+    // 7. Validate all documents for an application
     @PutMapping("/validate-all/{applicationId}")
     public ResponseEntity<String> validateAllDocuments(@PathVariable Integer applicationId) {
         List<Document> documents = documentRepository.findByLoanApplication_ApplicationId(applicationId);
@@ -116,7 +147,7 @@ public class DocumentController {
         return ResponseEntity.ok("Validated " + validatedCount + " out of " + documents.size() + " documents for Application ID: " + applicationId);
     }
 
-    // 7. Get validation report for an application
+    // 8. Get validation report for an application
     @GetMapping("/validation-report/{applicationId}")
     public ResponseEntity<String> getValidationReport(@PathVariable Integer applicationId) {
         accessControl.ensureCustomerOwnsApplication(applicationId);

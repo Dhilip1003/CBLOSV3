@@ -39,32 +39,71 @@ public class DisbursementService {
     }
     
     private void generateRepaymentSchedule(LoanAccount account, int months) {
-        BigDecimal principalPerMonth = account.getPrincipalAmount().divide(new BigDecimal(months), 2, RoundingMode.HALF_UP);
+        // Calculate base monthly principal distribution
+        BigDecimal totalPrincipal = account.getPrincipalAmount();
+        BigDecimal principalPerMonth = totalPrincipal.divide(new BigDecimal(months), 2, RoundingMode.HALF_UP);
         
-        for(int i = 1; i <= months; i++) {
+        // Calculate monthly interest fraction based on our dynamic account rate
+        // Monthly Interest = (Principal * Annual Rate Percentage) / 12 Months
+        double annualRate = account.getInterestRate(); // e.g., 12.0
+        BigDecimal annualRatePercentage = BigDecimal.valueOf(annualRate).divide(BigDecimal.valueOf(100));
+        BigDecimal totalAnnualInterest = totalPrincipal.multiply(annualRatePercentage);
+        BigDecimal interestPerMonth = totalAnnualInterest.divide(BigDecimal.valueOf(12), 2, RoundingMode.HALF_UP);
+
+        // Calculate aggregate monthly payment due
+        BigDecimal totalInstallmentAmount = principalPerMonth.add(interestPerMonth);
+
+        for (int i = 1; i <= months; i++) {
             RepaymentSchedule schedule = new RepaymentSchedule();
             schedule.setLoanAccount(account);
             schedule.setInstallmentNumber(i);
             schedule.setDueDate(LocalDate.now().plusMonths(i));
+            
+            // Map our mathematically sound components to your exact model setters
             schedule.setPrincipalComponent(principalPerMonth);
-            // Simplified logic: Total amount is just principal for this example
-            schedule.setInstallmentAmount(principalPerMonth); 
+            schedule.setInterestComponent(interestPerMonth);
+            schedule.setInstallmentAmount(totalInstallmentAmount); // ◄── Combined bill
             schedule.setStatus("Pending");
             
             scheduleRepository.save(schedule);
         }
+        System.out.println("🗓️ Schedule Generated: " + months + " months initialized with interest component: ₹" + interestPerMonth);
     }
 
+    /**
+     * 📊 GET /api/disbursement/report
+     * Generates a clean, text-based compliance report for bank auditors.
+     */
     public String generateDisbursementReport() {
+        // 1. Fetch all financial release rows from the database table
         List<Disbursement> allDisbursements = disbursementRepository.findAll();
-        StringBuilder report = new StringBuilder("--- Disbursement Compliance Report ---\n");
-        for (Disbursement d : allDisbursements) {
-            report.append("ID: ").append(d.getId())
-                  .append(" | AccountDbId: ").append(d.getLoanAccount().getId())
-                  .append(" | Account: ").append(d.getLoanAccount().getAccountNumber())
-                  .append(" | Amount: ").append(d.getDisbursedAmount())
-                  .append(" | Date: ").append(d.getDisbursementDate()).append("\n");
+        
+        if (allDisbursements.isEmpty()) {
+            return "--- Disbursement Compliance Report ---\nNo corporate disbursement records found in the core ledger.";
         }
+
+        StringBuilder report = new StringBuilder();
+        report.append("================================================================================\n");
+        report.append("🏛️ TRUSTEDGE COMMERCIAL BANK - DISBURSEMENT AUDIT REPORT\n");
+        report.append("Generated On: ").append(LocalDate.now()).append("\n");
+        report.append("================================================================================\n\n");
+
+        // 2. Loop through every payment record and format it into a scannable structure
+        for (Disbursement d : allDisbursements) {
+            report.append("📍 TRANSACTION RECORD [REF ID: ").append(d.getReferenceNumber()).append("]\n")
+                  .append("  • Disbursement Database Row ID : ").append(d.getId()).append("\n")
+                  .append("  • Associated Account Asset ID  : ").append(d.getLoanAccount().getId()).append("\n")
+                  .append("  • Core Checking Account Number : ").append(d.getLoanAccount().getAccountNumber()).append("\n")
+                  .append("  • Funded Corporate Client Name : ").append(d.getLoanAccount().getCustomer().getCompanyName()).append("\n")
+                  .append("  • Capital Released to Client   : ₹").append(d.getDisbursedAmount()).append("\n")
+                  .append("  • Settlement Timestamp Value   : ").append(d.getDisbursementDate()).append("\n")
+                  .append(" ───────────────────────────────────────────────────────────────────────────────\n");
+        }
+        
+        report.append("\n================================================================================\n");
+        report.append("🛡️ END OF COMPLIANCE LEDGER AUDIT STRINGS\n");
+        report.append("================================================================================\n");
+
         return report.toString();
     }
     

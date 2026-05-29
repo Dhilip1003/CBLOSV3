@@ -17,7 +17,15 @@ public class LoanOfficer {
     private String name;
 
     @Column(name = "designation")
-    private String designation;
+    private String designation; // e.g., "Senior Credit Analyst", "Regional Manager"
+
+    // ─── 🔐 NEW: System access role flag ───
+    @Column(name = "role", nullable = false)
+    private String role; // "OFFICER" or "MANAGER"
+
+    // ─── 📊 NEW: Workload balancing counter ───
+    @Column(name = "active_application_count")
+    private Integer activeApplicationCount = 0;
 
     // Default constructor
     public LoanOfficer() {}
@@ -34,4 +42,11 @@ public class LoanOfficer {
 
     public String getDesignation() { return designation; }
     public void setDesignation(String designation) { this.designation = designation; }
+
+    // ─── GETTERS AND SETTERS FOR THE NEW FIELDS ───
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public Integer getActiveApplicationCount() { return activeApplicationCount; }
+    public void setActiveApplicationCount(Integer activeApplicationCount) { this.activeApplicationCount = activeApplicationCount; }
 }

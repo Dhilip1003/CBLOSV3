@@ -28,6 +28,9 @@ public class AppUser {
     @Column(name = "loan_officer_id")
     private Integer loanOfficerId;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = false;
+    
     public AppUser() {}
 
     public Integer getId() { return id; }
@@ -49,4 +52,7 @@ public class AppUser {
 
     public Integer getLoanOfficerId() { return loanOfficerId; }
     public void setLoanOfficerId(Integer loanOfficerId) { this.loanOfficerId = loanOfficerId; }
+    
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { this.isActive = active; }
 }

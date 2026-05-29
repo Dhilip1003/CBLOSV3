@@ -1,6 +1,6 @@
 export interface AuthUser {
   email: string;
-  role: 'CUSTOMER' | 'OFFICER' | 'MANAGER';
+  role: 'CUSTOMER' | 'OFFICER' | 'MANAGER' | 'ADMIN';
   corporateCustomerId: number | null;
   loanOfficerId: number | null;
 }

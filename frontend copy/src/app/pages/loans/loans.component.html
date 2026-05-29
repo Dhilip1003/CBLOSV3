@@ -1,0 +1,36 @@
+<h1 class="page-title">Credit applications</h1>
+<p class="page-sub">Origination and facility requests.</p>
+<div class="cblos-card card mb-3 p-4">
+  <h2 class="h6 mb-3">New facility request</h2>
+  <div class="row g-3">
+    <div class="col-md-4"><label class="form-label small text-secondary">Client reference</label><input type="number" class="form-control" [(ngModel)]="customerId"></div>
+    <div class="col-md-4"><label class="form-label small text-secondary">Amount</label><input type="number" class="form-control" [(ngModel)]="loanAmount"></div>
+    <div class="col-md-4"><label class="form-label small text-secondary">Product</label><select class="form-select" [(ngModel)]="loanType"><option>Business</option><option>Personal</option></select></div>
+  </div>
+  <button type="button" class="btn btn-accent mt-3" (click)="submit()">Submit</button>
+</div>
+<div class="cblos-card card mb-3 p-4">
+  <div class="d-flex justify-content-between mb-3"><h2 class="h6 mb-0">Queue</h2><button type="button" class="btn btn-outline-secondary btn-sm" (click)="reload()">Refresh</button></div>
+  <table class="table table-cblos table-sm">
+    <thead><tr><th>Ref</th><th>Counterparty</th><th>Exposure</th><th>Product</th><th>Stage</th><th>Client</th></tr></thead>
+    <tbody>
+      @for (loan of loans; track loan.applicationId) {
+        <tr>
+          <td>{{ loan.applicationId }}</td>
+          <td>{{ company(loan) }}</td>
+          <td>{{ loan.loanAmount }}</td>
+          <td>{{ loan.loanType }}</td>
+          <td><span class="badge rounded-pill" [ngClass]="statusClass(loan.status)">{{ loan.status }}</span></td>
+          <td>{{ loan.customer?.id }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+<div class="cblos-card card p-4">
+  <h2 class="h6 mb-3">Inquiry</h2>
+  <input type="number" class="form-control mb-2" style="max-width:200px" [(ngModel)]="lookupId">
+  <button type="button" class="btn btn-outline-secondary btn-sm me-2" (click)="detail()">Full record</button>
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="status()">Stage only</button>
+  <pre class="pre-report p-3 mt-3 rounded">{{ lookupOut }}</pre>
+</div>

@@ -1,25 +1,260 @@
-<div class="row justify-content-center mt-5">
-  <div class="col-md-5">
-    <div class="cblos-card card p-4">
-      <h1 class="h4 mb-1">CBLOS Login</h1>
-      <p class="page-sub mb-4">Corporate users and bank staff sign in here.</p>
-      <form (ngSubmit)="submit()">
-        <div class="mb-3">
-          <label class="form-label small text-secondary" for="email">Email</label>
-          <input id="email" type="email" class="form-control" [(ngModel)]="email" name="email" required>
+<div class="login-container min-vh-100 d-flex align-items-center justify-content-center py-4">
+  <div class="login-card card shadow-lg" style="max-width: 500px; width: 100%;">
+    <div class="card-header bg-gradient-primary text-white border-0 p-4">
+      <div class="d-flex align-items-center gap-3">
+        <div class="logo-icon" style="font-size: 2.5rem;">🏦</div>
+        <div>
+          <h1 class="h3 mb-1">CBLOS</h1>
+          <p class="mb-0 small opacity-75">Corporate Loan Management System</p>
         </div>
-        <div class="mb-3">
-          <label class="form-label small text-secondary" for="password">Password</label>
-          <input id="password" type="password" class="form-control" [(ngModel)]="password" name="password" required>
+      </div>
+    </div>
+
+    <ul class="nav nav-tabs card-header-tabs" style="border-bottom: 2px solid #f0f0f0;">
+      <li class="nav-item">
+        <button 
+          class="nav-link fw-600 text-uppercase small"
+          [class.active]="activeTab() === 'login'"
+          (click)="switchTab('login')"
+          type="button"
+        >
+          <i class="bi bi-box-arrow-in-right me-2"></i>Login
+        </button>
+      </li>
+      <li class="nav-item">
+        <button 
+          class="nav-link fw-600 text-uppercase small"
+          [class.active]="activeTab() === 'register'"
+          (click)="switchTab('register')"
+          type="button"
+        >
+          <i class="bi bi-person-plus me-2"></i>Register
+        </button>
+      </li>
+    </ul>
+
+    <div class="card-body p-4">
+      @if (activeTab() === 'login') {
+        <div class="login-form-container">
+          <h3 class="h5 mb-1 fw-600">Sign in to your account</h3>
+          <p class="text-muted small mb-4">Enter your credentials to continue</p>
+
+          <form (ngSubmit)="submitLogin()" class="login-form">
+            <div class="mb-3">
+              <label for="loginEmail" class="form-label small text-secondary fw-500">
+                <i class="bi bi-envelope me-2"></i>Email Address
+              </label>
+              <input 
+                id="loginEmail" 
+                type="email" 
+                class="form-control form-control-lg" 
+                [(ngModel)]="loginEmail" 
+                name="loginEmail"
+                placeholder="you@company.com"
+                [disabled]="loginLoading"
+                required
+              >
+            </div>
+
+            <div class="mb-3">
+              <label for="loginPassword" class="form-label small text-secondary fw-500">
+                <i class="bi bi-lock me-2"></i>Password
+              </label>
+              <input 
+                id="loginPassword" 
+                type="password" 
+                class="form-control form-control-lg" 
+                [(ngModel)]="loginPassword" 
+                name="loginPassword"
+                placeholder="••••••••"
+                [disabled]="loginLoading"
+                required
+              >
+            </div>
+
+            @if (loginError) {
+              <div class="alert alert-danger border-0 rounded-lg d-flex align-items-start gap-2 mb-3" role="alert">
+                <i class="bi bi-exclamation-circle-fill mt-1" style="flex-shrink: 0;"></i>
+                <div>
+                  <strong class="d-block">Login Failed</strong>
+                  <small>{{ loginError }}</small>
+                </div>
+              </div>
+            }
+
+            <button 
+              type="submit" 
+              class="btn btn-primary btn-lg w-100 fw-600 text-uppercase"
+              [disabled]="loginLoading"
+            >
+              @if (loginLoading) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Signing in...
+              } @else {
+                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+              }
+            </button>
+          </form>
+
+          <div class="alert alert-info border-0 mt-4 small">
+            <strong>Demo Credentials:</strong>
+            <div class="mt-2 font-monospace small">
+              <div><strong>Customer:</strong> customer1&#64;abc.com / Customer&#64;123</div>
+              <div><strong>Officer:</strong> officer1&#64;cblos.com / Officer&#64;123</div>
+              <div><strong>Admin:</strong> admin&#64;cblos.com / Admin&#64;123</div>
+            </div>
+          </div>
         </div>
-        @if (error) {
-          <div class="alert alert-danger py-2">{{ error }}</div>
-        }
-        <button type="submit" class="btn btn-accent w-100">Sign in</button>
-      </form>
-      <p class="small text-secondary mt-4 mb-0">
-        Demo: customer&#64;demo.com / officer&#64;bank.com / manager&#64;bank.com — password: <strong>password</strong>
-      </p>
+      }
+
+      @if (activeTab() === 'register') {
+        <div class="register-form-container">
+          <h3 class="h5 mb-1 fw-600">Create your account</h3>
+          <p class="text-muted small mb-4">Register your company to get started</p>
+
+          <form (ngSubmit)="submitRegister()" class="register-form">
+            <div class="mb-3">
+              <label for="companyName" class="form-label small text-secondary fw-500">
+                <i class="bi bi-building me-2"></i>Company Name
+              </label>
+              <input 
+                id="companyName" 
+                type="text" 
+                class="form-control form-control-lg" 
+                [(ngModel)]="companyName" 
+                name="companyName"
+                placeholder="ABC Corporation"
+                [disabled]="registerLoading"
+                required
+              >
+            </div>
+
+            <div class="mb-3">
+              <label for="taxId" class="form-label small text-secondary fw-500">
+                <i class="bi bi-file-earmark-text me-2"></i>Tax ID
+              </label>
+              <input 
+                id="taxId" 
+                type="text" 
+                class="form-control form-control-lg" 
+                [(ngModel)]="taxId" 
+                name="taxId"
+                placeholder="TAX-001"
+                [disabled]="registerLoading"
+                required
+              >
+            </div>
+
+            <div class="mb-3">
+              <label for="industryType" class="form-label small text-secondary fw-500">
+                <i class="bi bi-graph-up me-2"></i>Industry Type
+              </label>
+              <select 
+                id="industryType" 
+                class="form-select form-select-lg" 
+                [(ngModel)]="industryType" 
+                name="industryType"
+                [disabled]="registerLoading"
+              >
+                @for (industry of getIndustries(); track industry) {
+                  <option [value]="industry">{{ industry }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="registerEmail" class="form-label small text-secondary fw-500">
+                <i class="bi bi-envelope me-2"></i>Email Address
+              </label>
+              <input 
+                id="registerEmail" 
+                type="email" 
+                class="form-control form-control-lg" 
+                [(ngModel)]="registerEmail" 
+                name="registerEmail"
+                placeholder="you@company.com"
+                [disabled]="registerLoading"
+                required
+              >
+            </div>
+
+            <div class="mb-3">
+              <label for="registerPassword" class="form-label small text-secondary fw-500">
+                <i class="bi bi-lock me-2"></i>Password
+              </label>
+              <input 
+                id="registerPassword" 
+                type="password" 
+                class="form-control form-control-lg" 
+                [(ngModel)]="registerPassword" 
+                name="registerPassword"
+                placeholder="••••••••"
+                [disabled]="registerLoading"
+                required
+              >
+              <small class="text-muted">At least 6 characters</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="registerPasswordConfirm" class="form-label small text-secondary fw-500">
+                <i class="bi bi-lock-check me-2"></i>Confirm Password
+              </label>
+              <input 
+                id="registerPasswordConfirm" 
+                type="password" 
+                class="form-control form-control-lg" 
+                [(ngModel)]="registerPasswordConfirm" 
+                name="registerPasswordConfirm"
+                placeholder="••••••••"
+                [disabled]="registerLoading"
+                required
+              >
+            </div>
+
+            @if (registerSuccess) {
+              <div class="alert alert-success border-0 rounded-lg d-flex align-items-start gap-2 mb-3" role="alert">
+                <i class="bi bi-check-circle-fill mt-1" style="flex-shrink: 0;"></i>
+                <div>
+                  <strong class="d-block">Success!</strong>
+                  <small>{{ registerSuccess }}</small>
+                </div>
+              </div>
+            }
+
+            @if (registerError) {
+              <div class="alert alert-danger border-0 rounded-lg d-flex align-items-start gap-2 mb-3" role="alert">
+                <i class="bi bi-exclamation-circle-fill mt-1" style="flex-shrink: 0;"></i>
+                <div>
+                  <strong class="d-block">Registration Error</strong>
+                  <small>{{ registerError }}</small>
+                </div>
+              </div>
+            }
+
+            <button 
+              type="submit" 
+              class="btn btn-success btn-lg w-100 fw-600 text-uppercase"
+              [disabled]="registerLoading"
+            >
+              @if (registerLoading) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Registering...
+              } @else {
+                <i class="bi bi-person-plus me-2"></i>Create Account
+              }
+            </button>
+          </form>
+
+          <div class="alert alert-light border-secondary border-opacity-25 mt-4 small">
+            <i class="bi bi-shield-check me-2 text-success"></i>
+            Your company information is secure and will only be used for loan processing.
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="card-footer bg-light border-top-0 p-3 text-center small text-muted">
+      <p class="mb-0">© 2026 CBLOS. All rights reserved.</p>
     </div>
   </div>
 </div>

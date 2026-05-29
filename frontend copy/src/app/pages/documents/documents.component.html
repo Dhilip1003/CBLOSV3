@@ -1,0 +1,43 @@
+<h1 class="page-title">Document vault</h1>
+<p class="page-sub">Imaging, certification, and retrieval.</p>
+<div class="cblos-card card mb-3 p-4">
+  <h2 class="h6 mb-3">Ingest</h2>
+  <div class="row g-3 align-items-end">
+    <div class="col-md-4"><label class="form-label small text-secondary">Application ref</label><input type="number" class="form-control" [(ngModel)]="applicationId"></div>
+    <div class="col-md-4"><label class="form-label small text-secondary">Artifact</label><input type="file" class="form-control" (change)="onFile($event)"></div>
+    <div class="col-md-4"><button type="button" class="btn btn-accent" (click)="upload()">Upload</button></div>
+  </div>
+  @if (msg) { <p class="small mt-2 mb-0">{{ msg }}</p> }
+</div>
+<div class="cblos-card card p-4">
+  <h2 class="h6 mb-3">Index</h2>
+  <input type="number" class="form-control mb-2" style="max-width:200px" [(ngModel)]="listAppId">
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="refresh()">Refresh</button>
+    @if (auth.isBankStaff()) {
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="certifyAll()">Certify batch</button>
+    }
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="loadReport()">Compliance digest</button>
+  </div>
+  <table class="table table-cblos table-sm">
+    <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Certified</th><th></th></tr></thead>
+    <tbody>
+      @for (d of docs; track d.documentId) {
+        <tr>
+          <td>{{ d.documentId }}</td>
+          <td>{{ d.fileName }}</td>
+          <td>{{ d.documentType || d.fileType }}</td>
+          <td>{{ d.isValid ? 'Yes' : 'No' }}</td>
+          <td class="text-nowrap">
+            <button type="button" class="btn btn-outline-secondary btn-sm me-1" (click)="download(d.documentId)">Retrieve</button>
+            @if (auth.isBankStaff()) {
+              <button type="button" class="btn btn-outline-secondary btn-sm me-1" (click)="certify(d.documentId)">Certify</button>
+            }
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="status(d.documentId)">Status</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  <pre class="pre-report p-3 mt-3 rounded">{{ report }}</pre>
+</div>

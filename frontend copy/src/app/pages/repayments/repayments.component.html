@@ -1,0 +1,23 @@
+<h1 class="page-title">Loan servicing</h1>
+<p class="page-sub">Amortization and settlement.</p>
+<div class="cblos-card card p-4">
+  <label class="form-label small text-secondary">Account ID</label>
+  <input type="number" class="form-control mb-2" style="max-width:200px" [(ngModel)]="accountId">
+  <button type="button" class="btn btn-accent btn-sm" (click)="load()">Retrieve</button>
+  <table class="table table-cblos table-sm mt-3">
+    <thead><tr><th>Inst.</th><th>Row</th><th>Due</th><th>Amount</th><th>State</th><th></th></tr></thead>
+    <tbody>
+      @for (r of rows; track r.id) {
+        <tr>
+          <td>{{ r.installmentNumber }}</td>
+          <td>{{ r.id }}</td>
+          <td>{{ r.dueDate }}</td>
+          <td>{{ r.installmentAmount }}</td>
+          <td>{{ r.status }}</td>
+          <td><button type="button" class="btn btn-outline-secondary btn-sm" (click)="pay(r)">Settle</button></td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  <pre class="pre-report p-3 mt-3 rounded">{{ log }}</pre>
+</div>

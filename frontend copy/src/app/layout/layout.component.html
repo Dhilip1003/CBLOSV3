@@ -1,0 +1,36 @@
+<header class="cblos-nav navbar navbar-expand-lg sticky-top px-3 py-2">
+  <a class="navbar-brand d-flex align-items-center gap-2 text-white" routerLink="/dashboard">
+    <span class="brand-mark"></span>
+    <span>
+      <strong>CBLOS</strong>
+      <small class="d-block text-secondary" style="font-size:0.58rem;letter-spacing:.16em">LENDING OPERATIONS</small>
+    </span>
+  </a>
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+    aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navMain">
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0 small">
+      <li class="nav-item"><a class="nav-link" routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/customers" routerLinkActive="active">Clients</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/officers" routerLinkActive="active">Officers</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/loans" routerLinkActive="active">Applications</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/collateral" routerLinkActive="active">Collateral</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/documents" routerLinkActive="active">Documents</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/credit" routerLinkActive="active">Risk</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/approvals" routerLinkActive="active">Decisions</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/disbursements" routerLinkActive="active">Treasury</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/repayments" routerLinkActive="active">Servicing</a></li>
+    </ul>
+    <div class="d-flex align-items-center gap-2 small text-secondary">
+      @if (auth.user(); as u) {
+        <span>{{ u.email }} · {{ u.role }}</span>
+      }
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="logout()">Logout</button>
+    </div>
+  </div>
+</header>
+<main class="container py-4" style="max-width:1140px">
+  <router-outlet />
+</main>

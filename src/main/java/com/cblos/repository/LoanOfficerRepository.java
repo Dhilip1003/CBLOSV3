@@ -8,13 +8,12 @@ import java.util.Optional;
 
 @Repository
 public interface LoanOfficerRepository extends JpaRepository<LoanOfficer, Integer> {
+    
     Optional<LoanOfficer> findByEmployeeId(String employeeId);
     
- // NEW: Smart routing query to find the officer with the lowest active workload
-    @Query(value = "SELECT o.* FROM loan_officer o " +
-                   "LEFT JOIN loan_application a ON o.id = a.officer_id AND a.status IN ('PENDING', 'UNDER_REVIEW') " +
-                   "GROUP BY o.id " +
-                   "ORDER BY COUNT(a.application_id) ASC LIMIT 1", 
-           nativeQuery = true)
+    /**
+     * 🧠 FIXED: Finds the single active internal Officer with the lowest application counter
+     */
+    @Query(value = "SELECT * FROM loan_officer WHERE role = 'OFFICER' ORDER BY active_application_count ASC LIMIT 1", nativeQuery = true)
     Optional<LoanOfficer> findLeastLoadedOfficer();
 }

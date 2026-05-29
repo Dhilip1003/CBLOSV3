@@ -12,25 +12,31 @@ public class LoanApplication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer applicationId;
 
-    // Relationship: Many applications can belong to one Corporate Customer
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private CorporateCustomer customer;
 
-    // Relationship: Many applications can be assigned to one Loan Officer
     @ManyToOne
     @JoinColumn(name = "officer_id")
-    private LoanOfficer loanOfficer; // Can be null initially until assigned
+    private LoanOfficer loanOfficer; 
 
-    private String loanType;
+    // ─── 🔗 NEW: Relationship linking this request to the strict product rule catalog ───
+    @ManyToOne
+    @JoinColumn(name = "loan_product_id")
+    private LoanProduct loanProduct; 
+
+    private String loanType; // Can match loanProduct.getProductName() dynamically
     private BigDecimal loanAmount;
     private String status;
     private LocalDate submissionDate;
 
-    // Default constructor
+    // ─── 📅 NEW: Field tracking the customer's selected customized payback timeframe ───
+    @Column(name = "requested_tenure_months")
+    private Integer requestedTenureMonths; 
+
     public LoanApplication() {}
 
-    // Getters and Setters
+    // --- YOUR EXISTING GETTERS & SETTERS ---
     public Integer getApplicationId() { return applicationId; }
     public void setApplicationId(Integer applicationId) { this.applicationId = applicationId; }
 
@@ -51,4 +57,11 @@ public class LoanApplication {
 
     public LocalDate getSubmissionDate() { return submissionDate; }
     public void setSubmissionDate(LocalDate submissionDate) { this.submissionDate = submissionDate; }
+
+    // --- 🧬 NEW GETTERS AND SETTERS FOR THE UPDATED FIELDS ---
+    public LoanProduct getLoanProduct() { return loanProduct; }
+    public void setLoanProduct(LoanProduct loanProduct) { this.loanProduct = loanProduct; }
+
+    public Integer getRequestedTenureMonths() { return requestedTenureMonths; }
+    public void setRequestedTenureMonths(Integer requestedTenureMonths) { this.requestedTenureMonths = requestedTenureMonths; }
 }

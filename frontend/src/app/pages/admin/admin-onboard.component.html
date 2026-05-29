@@ -1,0 +1,316 @@
+<div class="admin-container">
+  <!-- Header -->
+  <div class="admin-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="h3 mb-1">
+          <i class="bi bi-person-badge me-2"></i>Admin Panel
+        </h1>
+        <p class="text-muted mb-0">Manage loan officers and system administration</p>
+      </div>
+      <div class="badge bg-info text-dark">
+        <i class="bi bi-shield-check me-2"></i>Admin User
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <ul class="nav nav-tabs nav-fill mb-4">
+    <li class="nav-item">
+      <button 
+        class="nav-link fw-600 py-3"
+        [class.active]="activeTab() === 'onboard'"
+        (click)="switchTab('onboard')"
+        type="button"
+      >
+        <i class="bi bi-person-plus me-2"></i>Onboard Officer
+      </button>
+    </li>
+    <li class="nav-item">
+      <button 
+        class="nav-link fw-600 py-3"
+        [class.active]="activeTab() === 'list'"
+        (click)="switchTab('list')"
+        type="button"
+      >
+        <i class="bi bi-list-ul me-2"></i>View Officers
+      </button>
+    </li>
+  </ul>
+
+  <!-- ONBOARD TAB -->
+  @if (activeTab() === 'onboard') {
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-gradient-info text-white border-0">
+            <h5 class="mb-0">
+              <i class="bi bi-person-check me-2"></i>Register New Loan Officer
+            </h5>
+          </div>
+          <div class="card-body p-4">
+            <form (ngSubmit)="submitOnboard()">
+              <div class="row">
+                <!-- Employee ID -->
+                <div class="col-md-6 mb-3">
+                  <label for="employeeId" class="form-label small text-secondary fw-500">
+                    <i class="bi bi-hash me-2"></i>Employee ID
+                  </label>
+                  <input 
+                    id="employeeId" 
+                    type="text" 
+                    class="form-control form-control-lg" 
+                    [(ngModel)]="employeeId" 
+                    name="employeeId"
+                    placeholder="EMP-001"
+                    [disabled]="isLoading"
+                    required
+                  >
+                  <small class="text-muted">Unique identifier (e.g., EMP-001)</small>
+                </div>
+
+                <!-- Officer Name -->
+                <div class="col-md-6 mb-3">
+                  <label for="officerName" class="form-label small text-secondary fw-500">
+                    <i class="bi bi-person me-2"></i>Full Name
+                  </label>
+                  <input 
+                    id="officerName" 
+                    type="text" 
+                    class="form-control form-control-lg" 
+                    [(ngModel)]="officerName" 
+                    name="officerName"
+                    placeholder="John Davis"
+                    [disabled]="isLoading"
+                    required
+                  >
+                </div>
+
+                <!-- Designation -->
+                <div class="col-md-6 mb-3">
+                  <label for="designation" class="form-label small text-secondary fw-500">
+                    <i class="bi bi-briefcase me-2"></i>Designation
+                  </label>
+                  <select 
+                    id="designation" 
+                    class="form-select form-select-lg" 
+                    [(ngModel)]="designation" 
+                    name="designation"
+                    [disabled]="isLoading"
+                  >
+                    @for (desig of getDesignations(); track desig) {
+                      <option [value]="desig">{{ desig }}</option>
+                    }
+                  </select>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6 mb-3">
+                  <label for="email" class="form-label small text-secondary fw-500">
+                    <i class="bi bi-envelope me-2"></i>Email Address
+                  </label>
+                  <input 
+                    id="email" 
+                    type="email" 
+                    class="form-control form-control-lg" 
+                    [(ngModel)]="email" 
+                    name="email"
+                    placeholder="officer@cblos.com"
+                    [disabled]="isLoading"
+                    required
+                  >
+                </div>
+
+                <!-- Password -->
+                <div class="col-md-6 mb-3">
+                  <label for="password" class="form-label small text-secondary fw-500">
+                    <i class="bi bi-lock me-2"></i>Password
+                  </label>
+                  <input 
+                    id="password" 
+                    type="password" 
+                    class="form-control form-control-lg" 
+                    [(ngModel)]="password" 
+                    name="password"
+                    placeholder="••••••••"
+                    [disabled]="isLoading"
+                    required
+                  >
+                  <small class="text-muted">Minimum 8 characters</small>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="col-md-6 mb-3">
+                  <label for="passwordConfirm" class="form-label small text-secondary fw-500">
+                    <i class="bi bi-lock-check me-2"></i>Confirm Password
+                  </label>
+                  <input 
+                    id="passwordConfirm" 
+                    type="password" 
+                    class="form-control form-control-lg" 
+                    [(ngModel)]="passwordConfirm" 
+                    name="passwordConfirm"
+                    placeholder="••••••••"
+                    [disabled]="isLoading"
+                    required
+                  >
+                </div>
+              </div>
+
+              <!-- Success Message -->
+              @if (formSuccess) {
+                <div class="alert alert-success border-0 rounded-lg d-flex align-items-start gap-2 mb-3" role="alert">
+                  <i class="bi bi-check-circle-fill mt-1" style="flex-shrink: 0;"></i>
+                  <div>
+                    <strong class="d-block">Officer Registered</strong>
+                    <small>{{ formSuccess }}</small>
+                  </div>
+                </div>
+              }
+
+              <!-- Error Message -->
+              @if (formError) {
+                <div class="alert alert-danger border-0 rounded-lg d-flex align-items-start gap-2 mb-3" role="alert">
+                  <i class="bi bi-exclamation-circle-fill mt-1" style="flex-shrink: 0;"></i>
+                  <div>
+                    <strong class="d-block">Registration Error</strong>
+                    <small>{{ formError }}</small>
+                  </div>
+                </div>
+              }
+
+              <!-- Submit Button -->
+              <button 
+                type="submit" 
+                class="btn btn-primary btn-lg w-100 fw-600 text-uppercase"
+                [disabled]="isLoading"
+              >
+                @if (isLoading) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Registering...
+                } @else {
+                  <i class="bi bi-person-check me-2"></i>Register Officer
+                }
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="card border-0 shadow-sm mt-4">
+          <div class="card-body">
+            <div class="alert alert-info border-0 mb-0">
+              <h6 class="alert-heading">
+                <i class="bi bi-info-circle me-2"></i>Officer Registration Information
+              </h6>
+              <ul class="mb-0 small">
+                <li>Each officer must have a unique Employee ID</li>
+                <li>Officers can log in with their email and password</li>
+                <li>Officers can manage loan applications and approvals</li>
+                <li>Passwords must be at least 8 characters long</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- LIST TAB -->
+  @if (activeTab() === 'list') {
+    <div class="row">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-gradient-info text-white border-0 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="bi bi-people me-2"></i>Registered Loan Officers
+            </h5>
+            <button 
+              class="btn btn-sm btn-light"
+              (click)="loadOfficers()"
+              [disabled]="listLoading"
+            >
+              <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+            </button>
+          </div>
+
+          <div class="card-body p-0">
+            @if (listLoading) {
+              <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="text-muted mt-3">Loading officers...</p>
+              </div>
+            } @else if (listError) {
+              <div class="alert alert-danger border-0 rounded-0 m-0 d-flex align-items-start gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill mt-1" style="flex-shrink: 0;"></i>
+                <div>
+                  <strong>Error Loading Officers</strong>
+                  <br>
+                  <small>{{ listError }}</small>
+                </div>
+              </div>
+            } @else if (officers.length === 0) {
+              <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                <p class="text-muted mt-3">No loan officers registered yet.</p>
+              </div>
+            } @else {
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="fw-600">
+                        <i class="bi bi-hash me-2"></i>Employee ID
+                      </th>
+                      <th class="fw-600">
+                        <i class="bi bi-person me-2"></i>Name
+                      </th>
+                      <th class="fw-600">
+                        <i class="bi bi-briefcase me-2"></i>Designation
+                      </th>
+                      <th class="fw-600">
+                        <i class="bi bi-calendar me-2"></i>Registered
+                      </th>
+                      <th class="fw-600">
+                        <i class="bi bi-list-check me-2"></i>Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (officer of officers; track officer.id) {
+                      <tr class="border-bottom">
+                        <td class="align-middle">
+                          <span class="badge bg-light text-dark">{{ officer.employeeId }}</span>
+                        </td>
+                        <td class="align-middle fw-500">
+                          <i class="bi bi-person-circle me-2 text-primary"></i>
+                          {{ officer.name }}
+                        </td>
+                        <td class="align-middle">
+                          <span class="text-secondary">{{ officer.designation }}</span>
+                        </td>
+                        <td class="align-middle text-muted small">
+                          {{ formatDate(officer.createdAt) }}
+                        </td>
+                        <td class="align-middle">
+                          <span class="badge bg-success">Active</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+
+          <div class="card-footer bg-light border-top small text-muted">
+            <i class="bi bi-info-circle me-2"></i>
+            Total Officers: <strong>{{ officers.length }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

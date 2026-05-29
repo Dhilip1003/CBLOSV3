@@ -1,0 +1,9 @@
+<h1 class="page-title">Credit risk</h1>
+<p class="page-sub">Bureau and internal scoring.</p>
+<div class="cblos-card card p-4">
+  <label class="form-label small text-secondary">Application reference</label>
+  <input type="number" class="form-control mb-3" style="max-width:240px" [(ngModel)]="applicationId">
+  <button type="button" class="btn btn-accent btn-sm me-2" (click)="evaluate()">Run model</button>
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="risk()">Risk snapshot</button>
+  <pre class="pre-report p-3 mt-3 rounded">{{ output }}</pre>
+</div>
